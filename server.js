@@ -1,22 +1,8 @@
 import {fastify} from 'fastify'
-
+import { router } from './routes/router.js';
 const server = fastify()
 
-server.get('/professores', ()=>{
-    return 'hello word - professores'
-})
-
-server.get('/disciplinas', () =>{
-    return 'hello word - disciplinas'
-})
-
-server.get('/materiais', () =>{
-    return 'hello word - materiais'
-})
-
-server.get('/favoritos', () =>{
-    return 'hello word - favoritos'
-})
+await server.register(router);
 
 server.listen({
     port:3333,
