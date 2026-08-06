@@ -5,13 +5,14 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "tsx watch --env-file .env | src/server.ts",
     "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "fastify": "^5.11.2"
+    "fastify": "^5.11.2",
+    "prisma": "^7.9.1"
   }
 }
