@@ -11,3 +11,30 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Disciplina{
+  id Int @id @default(autoincrement())
+  nome String
+  descricao String?
+  createdAt DateTime @default(now())
+
+  materiais Material[]
+}
+
+model Material{
+  id Int @id @default((autoincrement()))
+  titulo String
+  descricao String
+  url String
+  status String 
+  motivoRejeicao String?
+  crreatedAt DateTime @default(now())
+
+  professorId Int
+  disciplinaId Int
+
+  professor Professor @relation(fields: [professorId], references: [id])
+  disciplina Disciplina @relation(fields: [disciplinaId], references: [id])
+
+  favoritos Favorito[]
+}
