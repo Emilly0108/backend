@@ -1,4 +1,4 @@
-export function favoritosRoutes(server) {
+export function favoritos(server) {
   server.get('/favoritos', () => {
    return 'hello word - favoritos'
 })

@@ -1,4 +1,4 @@
-export function materiais(){
+export function materiais(server){
     server.post('/materiais', async(request, reply) =>{
         return 'Hello - materiais'
     })

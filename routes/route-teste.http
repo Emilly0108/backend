@@ -27,3 +27,24 @@ DELETE http://localhost:3333/favoritos
 ### cadastrar material
 
 POST http://localhost:3333/materiais
+
+### listar materiais
+GET http://localhost:3333/materiais
+
+### atualizar materiais
+PUT http://localhost:3333/materiais
+
+### deletar materiais
+DELETE http://localhost:3333/materiais
+
+### criar disciplinas
+POST http://localhost:3333/disciplinas
+
+### listar disciplinas
+GET http://localhost:3333/disciplinas
+
+### atualizar disciplinas
+PUT http://localhost:3333/disciplinas
+
+### deletar disciplinas
+DELETE http://localhost:3333/disciplinas

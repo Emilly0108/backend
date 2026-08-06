@@ -1,4 +1,4 @@
-export function disciplinasRoutes(server){
+export function disciplinas(server){
     server.post('/disciplinas', async(request, reply) => {
         return 'Hello - Disciplinas'
     })

@@ -1,4 +1,4 @@
-export function professoresRoutes(server) {
+export function professores(server) {
   server.get('/professores', () => {
    return 'hello word - professores'
 })
