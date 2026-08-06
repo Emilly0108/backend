@@ -24,4 +24,6 @@ PUT http://localhost:3333/favoritos
 ### remover favoritos
 DELETE http://localhost:3333/favoritos
 
+### cadastrar material
 
+POST http://localhost:3333/materiais
