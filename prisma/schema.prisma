@@ -11,3 +11,22 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+
+model Professor{
+  idProfessor String @id @default(uuid()) @map("id_professor")
+  nome String
+  email String
+  senha String
+  tipo String
+
+  @@map("professores")
+}
+
+model Favorito{
+  idFavorito String @id @default(uuid()) @map("id_favorito")
+  idMaterial String @map("id_material")
+  material Material @relation(fields: [idMaterial], references: [id])
+
+  @@map("favoritos")
+}
