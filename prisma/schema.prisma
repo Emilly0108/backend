@@ -16,17 +16,45 @@ datasource db {
 model Professor{
   idProfessor String @id @default(uuid()) @map("id_professor")
   nome String
-  email String
+  email String @unique
   senha String
   tipo String
+  materiais   Material[]
 
   @@map("professores")
 }
 
 model Favorito{
   idFavorito String @id @default(uuid()) @map("id_favorito")
-  idMaterial String @map("id_material")
+  idMaterial Int @map("id_material")
   material Material @relation(fields: [idMaterial], references: [id])
 
   @@map("favoritos")
+}
+
+model Disciplina{
+  id Int @id @default(autoincrement())
+  nome String
+  descricao String?
+  createdAt DateTime @default(now())
+
+  materiais Material[]
+}
+
+model Material{
+  id Int @id @default((autoincrement()))
+  titulo String
+  descricao String
+  url String
+  status String 
+  motivoRejeicao String?
+  crreatedAt DateTime @default(now())
+
+  professorId Int
+  disciplinaId Int
+
+  professor Professor @relation(fields: [professorId], references: [idProfessor])
+  disciplina Disciplina @relation(fields: [disciplinaId], references: [id])
+
+  favoritos Favorito[]
 }
