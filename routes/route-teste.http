@@ -1,0 +1,27 @@
+### listar professores
+GET http://localhost:3333/professores
+
+### cadastrat professor
+POST http://localhost:3333/professores
+
+### editar professor
+PUT http://localhost:3333/professores
+
+### remover professor
+DELETE http://localhost:3333/professores
+
+### listar favotiros
+GET http://localhost:3333/favoritos
+
+
+### cadastrat favorito
+POST http://localhost:3333/favoritos
+
+
+### editar favorito
+PUT http://localhost:3333/favoritos
+
+### remover favoritos
+DELETE http://localhost:3333/favoritos
+
+
