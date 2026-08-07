@@ -13,10 +13,15 @@ Content-Type: application/json
 }
 
 ### editar professor
-PUT http://localhost:3333/professores
+PUT http://localhost:3333/professores/1
+Content-Type: application/json
+
+{
+    "nome": "bianca"
+}
 
 ### remover professor
-DELETE http://localhost:3333/professores
+DELETE http://localhost:3333/professores/1
 
 ### listar favotiros
 GET http://localhost:3333/favoritos

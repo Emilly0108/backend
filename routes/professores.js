@@ -3,14 +3,22 @@ import bcrypt from 'bcrypt'
 
 export function professores(server) {
   server.get('/professores', async (request, reply) => {
-   return 'hello word - professores'
+    const search = request.query.search
+    const professores = await prisma.professor.findMany({
+    where: search ? {
+      nome: { contains: search, mode: 'insensitive' }
+    } : undefined
+  })
+
+  return reply.send(professores)
 })
+   
 
   server.post('/professores', async (request, reply) => {
     const {nome, email, senha, tipo} = request.body
 
     // Criptografa a senha antes de salvar
-  const senhaCriptografada = await bcrypt.hash(senha, 10)
+    const senhaCriptografada = await bcrypt.hash(senha, 10)
 
     const professor = await prisma.professor.create({
       data:{
@@ -23,11 +31,37 @@ export function professores(server) {
     return reply.status(201).send(professor)
 })
 
-  server.put('/professores:id', async (request, reply)=>{
-    return 'atualizar professor'
+  server.put('/professores/:id', async (request, reply)=>{
+    const { id } = request.params
+    const { nome, email,senha, tipo } = request.body
+
+ const dadosParaAtualizar = {
+      nome,
+      email,
+      tipo
+    }
+
+    // Se enviou senha no body, criptografa e adiciona aos dados
+    if (senha) {
+      dadosParaAtualizar.senha = await bcrypt.hash(senha, 10)
+    }
+
+    const professorAtualizado = await prisma.professor.update({
+      where: { id: Number(id) },
+      data: dadosParaAtualizar
+    })
+
+    return reply.send(professorAtualizado)
   })
 
-  server.delete('/professores:id', async (request, reply) =>{
-    return 'deletar professor'
-  })
+  server.delete('/professores/:id', async (request, reply) =>{
+    const {id} = request.params
+
+    await prisma.professor.delete({
+      where: {id: Number(id)}
+    })
+
+    return reply.status(204).send()
+
+})
 }
