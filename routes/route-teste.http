@@ -3,6 +3,14 @@ GET http://localhost:3333/professores
 
 ### cadastrat professor
 POST http://localhost:3333/professores
+Content-Type: application/json
+
+{
+    "nome": "Emilly",
+    "email": "emilly@email.com",
+    "senha": "123456",
+    "tipo": "comum"
+}
 
 ### editar professor
 PUT http://localhost:3333/professores
