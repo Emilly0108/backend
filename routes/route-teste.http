@@ -43,8 +43,7 @@ Content-Type: application/json
 
 {
 
-    "nome" : "pedras",
-    "descricao" : "Pedras e mais pedras"
+    "nome" : "topografia"
 
 }
 
