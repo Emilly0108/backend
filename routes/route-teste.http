@@ -51,7 +51,13 @@ Content-Type: application/json
 GET http://localhost:3333/disciplinas
 
 ### atualizar disciplinas
-PUT http://localhost:3333/disciplinas
+PUT http://localhost:3333/disciplinas/2
+Content-Type: application/json
+
+{ 
+
+    "nome": "Topografia avançada"
+}
 
 ### deletar disciplinas
-DELETE http://localhost:3333/disciplinas
+DELETE http://localhost:3333/disciplinas/2
