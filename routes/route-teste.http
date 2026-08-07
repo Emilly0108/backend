@@ -39,6 +39,14 @@ DELETE http://localhost:3333/materiais
 
 ### criar disciplinas
 POST http://localhost:3333/disciplinas
+Content-Type: application/json
+
+{
+
+    "nome" : "pedras",
+    "descricao" : "Pedras e mais pedras"
+
+}
 
 ### listar disciplinas
 GET http://localhost:3333/disciplinas

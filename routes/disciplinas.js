@@ -1,6 +1,17 @@
+import { prisma } from "../lib/prisma.js"
 export function disciplinas(server){
     server.post('/disciplinas', async(request, reply) => {
-        return 'Hello - Disciplinas'
+        const {nome, descricao} = request.body
+
+        const disciplina = await prisma.disciplina.create({
+            data:{
+                nome,
+                descricao
+            }
+
+        })
+
+        return disciplina
     })
 
     server.get('/disciplinas', async (request,reply)=>{
