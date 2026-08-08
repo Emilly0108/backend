@@ -1,7 +1,17 @@
 import fastify from 'fastify';
+import fastifyMultipart from '@fastify/multipart';
+import fastifyStatic from '@fastify/static';
+import path from 'path';
 import { router } from '../routes/router';
 
 const app = fastify();
+
+app.register(fastifyMultipart);
+
+app.register(fastifyStatic, {
+    root: path.join(process.cwd(), 'uploads'),
+    prefix: '/uploads/',
+});
 
 app.register(router)
 

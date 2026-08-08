@@ -38,8 +38,37 @@ PUT http://localhost:3333/favoritos
 DELETE http://localhost:3333/favoritos
 
 ### cadastrar material
-
 POST http://localhost:3333/materiais
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="titulo"
+
+Introdução a topografia
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="descricao"
+
+Material sobre Topografia
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="disciplinaId"
+
+1
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="professorId"
+
+1
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="aula1.pdf"
+Content-Type: application/pdf
+
+< ./arquivos/aula1.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+
+
+
 
 ### listar materiais
 GET http://localhost:3333/materiais
