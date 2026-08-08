@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -10,7 +5,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  
 }
 
 model Professor {
@@ -33,31 +27,27 @@ model Favorito {
 }
 
 model Disciplina {
-  id        Int      @id @default(autoincrement()) @map("id_disciplina")
+  id        Int        @id @default(autoincrement()) @map("id_disciplina")
   nome      String
-  createdAt DateTime @default(now())
-
+  createdAt DateTime   @default(now())
   materiais Material[]
 
   @@map("disciplinas")
 }
 
 model Material {
-  id             Int      @id @default(autoincrement()) @map("id_material")
+  id             Int        @id @default(autoincrement()) @map("id_material")
   titulo         String
   descricao      String
   url            String
   status         String
   motivoRejeicao String?
-  createdAt      DateTime @default(now())
-
-  professorId  Int
-  disciplinaId Int
-
-  professor  Professor  @relation(fields: [professorId], references: [id])
-  disciplina Disciplina @relation(fields: [disciplinaId], references: [id])
-
-  favoritos Favorito[]
+  createdAt      DateTime   @default(now())
+  professorId    Int
+  disciplinaId   Int
+  favoritos      Favorito[]
+  disciplina     Disciplina @relation(fields: [disciplinaId], references: [id])
+  professor      Professor  @relation(fields: [professorId], references: [id])
 
   @@map("materiais")
 }

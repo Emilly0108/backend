@@ -24,18 +24,20 @@ export function favoritos(server) {
 
     const favorito = await prisma.favorito.create({
     data: {
-      id_material: Number(id_material), 
-      data_salvo: new Date()           
+     material: {
+        connect: { id: Number(id_material) }
+      }
     }
   })
-  return reply.status(201).send(favorito)
-})
+   return reply.status(201).send(favorito)
+  })
+ 
 
-  server.delete('/favoritos:id', async (request, reply) =>{
+  server.delete('/favoritos/:id', async (request, reply) =>{
     const { id } = request.params
 
     await prisma.favorito.delete({
-      where: { id_favorito: Number(id) }
+      where: { id: Number(id) }
     })
 
     return reply.status(204).send()
