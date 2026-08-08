@@ -66,18 +66,23 @@ Content-Type: application/pdf
 < ./arquivos/aula1.pdf
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
-
-
-
-
 ### listar materiais
 GET http://localhost:3333/materiais
 
 ### atualizar materiais
-PUT http://localhost:3333/materiais
+PUT http://localhost:3333/materiais/6
+Content-Type: application/json
+
+{ 
+
+    "titulo": "Mineralogia",
+    "descricao": "pedras",
+    "disciplinaId": 1
+
+}
 
 ### deletar materiais
-DELETE http://localhost:3333/materiais
+DELETE http://localhost:3333/materiais/6
 
 ### criar disciplinas
 POST http://localhost:3333/disciplinas

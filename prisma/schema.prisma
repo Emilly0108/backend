@@ -38,6 +38,8 @@ model Disciplina {
   createdAt DateTime @default(now())
 
   materiais Material[]
+
+  @@map("disciplinas")
 }
 
 model Material {
@@ -56,4 +58,6 @@ model Material {
   disciplina Disciplina @relation(fields: [disciplinaId], references: [id])
 
   favoritos Favorito[]
+
+  @@map("materiais")
 }

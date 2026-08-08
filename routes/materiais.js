@@ -43,14 +43,37 @@ export function materiais(server){
     })
 
     server.get('/materiais', async(request, reply) =>{
-        return 'listar - materiais'
+        const materiais = await prisma.material.findMany();
+
+        return reply.status(200).send(materiais);
     })
 
-    server.put('/materiais:id', async(request, reply) =>{
-        return 'atualizar - materiais'
+    server.put('/materiais/:id', async(request, reply) =>{
+        const {id} = request.params;
+
+        const {titulo, descricao, disciplinaId} = request.body;
+
+        const material = await prisma.material.update({
+            where:{
+                id:Number(id)
+            },
+            data: {
+                titulo,
+                descricao,
+                disciplinaId: Number(disciplinaId)
+            }
+        });
+
+        return reply.status(200).send(material);
     })
 
-    server.delete('/materiais:id', async(request, reply)=>{
-        return 'deletar - materiais'
+    server.delete('/materiais/:id', async(request, reply)=>{
+        const {id} = request.params
+
+        await prisma.material.delete({
+            where: {id: Number(id)}
+        })
+
+        return reply.status(204).send()
     })
 }
