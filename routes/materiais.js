@@ -1,4 +1,5 @@
 
+import { request } from "http";
 import { prisma } from "../lib/prisma.ts"
 export function materiais(server){
     server.post('/materiais', async(request, reply) =>{
@@ -47,6 +48,20 @@ export function materiais(server){
 
         return reply.status(200).send(materiais);
     })
+
+    server.get('/materiais/:id', async(request, reply) =>{
+        const {id} = request.params;
+
+        const material = await prisma.material.findUnique({
+            where: {id:Number(id)}
+        })
+
+        if(!material){
+            return reply.status(404).send({mensagem: 'Material não encontrado'})
+        }
+
+        return reply.status(200).send(material);
+    } )
 
     server.put('/materiais/:id', async(request, reply) =>{
         const {id} = request.params;

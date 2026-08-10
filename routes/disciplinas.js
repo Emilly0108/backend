@@ -1,3 +1,4 @@
+import { request } from "http"
 import { prisma } from "../lib/prisma.ts"
 export function disciplinas(server){
     server.post('/disciplinas', async(request, reply) => {
@@ -23,6 +24,20 @@ export function disciplinas(server){
             } : undefined
         })
         return disciplinas
+    })
+
+    server.get('/disciplinas/:id', async (request,reply) =>{
+        const {id} = request.params;
+
+        const disciplina = await prisma.disciplina.findUnique({
+            where: {id:Number(id)}
+        })
+
+        if(!disciplina){
+            return reply.status(404).send({mensagem: 'Disciplina não encontrada'})
+        }
+
+        return reply.status(200).send(disciplina);
     })
 
     server.put('/disciplinas/:id', async(request, reply)=>{
