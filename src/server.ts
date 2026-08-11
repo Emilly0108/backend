@@ -1,10 +1,23 @@
 import fastify from 'fastify';
 import fastifyMultipart from '@fastify/multipart';
+import fastifyJwt from '@fastify/jwt';
 import fastifyStatic from '@fastify/static';
 import path from 'path';
 import { router } from '../routes/router';
 
 const app = fastify();
+
+app.register(fastifyJwt, {
+    secret: process.env.JWT_SECRET as string
+});
+
+app. decorate('authenticate', async function(request: any, reply: any){
+    try{
+        await request.JwtVerify();
+    } catch(erro){
+        reply.status(401).send({error: 'Token inválido ou ausente'});
+    }
+})
 
 app.register(fastifyMultipart);
 
