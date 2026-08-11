@@ -17,6 +17,16 @@ export function professores(server) {
   server.post('/professores', async (request, reply) => {
     const {nome, email, senha, tipo} = request.body
 
+    const professorExistente = await prisma.professor.findUnique({
+      where:{
+        email
+      }
+    })
+
+    if (professorExistente) {
+    return reply.status(409).send({ message: "E-mail já cadastrado!" })
+  }
+
     // Criptografa a senha antes de salvar
     const senhaCriptografada = await bcrypt.hash(senha, 10)
 
@@ -30,6 +40,22 @@ export function professores(server) {
     })
     return reply.status(201).send(professor)
 })
+
+  server.get('/professores/:id', async (request, reply) => {
+    const{id} = request.params
+
+    const professor = await prisma.professor.findUnique({
+      where:{
+        id: Number(id)
+      }
+    })
+
+    if(!professor){
+      return reply.status(404).send({message: "professor não encontrado"})
+    }
+
+    return reply.send(professor)
+  })
 
   server.put('/professores/:id', async (request, reply)=>{
     const { id } = request.params

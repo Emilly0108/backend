@@ -1,19 +1,22 @@
 ### listar professores
 GET http://localhost:3333/professores
 
+###
+GET http://localhost:3333/professores/6
+
 ### cadastrat professor
 POST http://localhost:3333/professores
 Content-Type: application/json
 
 {
-    "nome": "Bianca",
-    "email": "bianca@email.com",
-    "senha": "123456",
+    "nome": "clara",
+    "email": "clara@email.com",
+    "senha": "000001",
     "tipo": "comum"
 }
 
 ### editar professor
-PUT http://localhost:3333/professores/7
+PUT http://localhost:3333/professores/3
 Content-Type: application/json
 
 {
@@ -21,7 +24,7 @@ Content-Type: application/json
 }
 
 ### remover professor
-DELETE http://localhost:3333/professores/7
+DELETE http://localhost:3333/professores/3
 
 ### listar favotiros
 GET http://localhost:3333/favoritos
