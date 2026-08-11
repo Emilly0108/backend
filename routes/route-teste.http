@@ -29,6 +29,9 @@ DELETE http://localhost:3333/professores/3
 ### listar favotiros
 GET http://localhost:3333/favoritos
 
+###
+GET http://localhost:3333/favoritos/2
+
 ### cadastrat favorito
 POST http://localhost:3333/favoritos
 Content-Type: application/json
