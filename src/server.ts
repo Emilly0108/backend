@@ -11,9 +11,9 @@ app.register(fastifyJwt, {
     secret: process.env.JWT_SECRET as string
 });
 
-app. decorate('authenticate', async function(request: any, reply: any){
+app.decorate('authenticate', async function(request: any, reply: any){
     try{
-        await request.JwtVerify();
+        await request.jwtVerify();
     } catch(erro){
         reply.status(401).send({error: 'Token inválido ou ausente'});
     }

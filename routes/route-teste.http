@@ -1,7 +1,9 @@
-### listar professores
+@baseUrl = http://localhost:3333
+@authToken = Bearer {{login.response.body.token}}
+
 GET http://localhost:3333/professores
 
-###
+### listar por id
 GET http://localhost:3333/professores/6
 
 ### cadastrat professor
@@ -9,22 +11,28 @@ POST http://localhost:3333/professores
 Content-Type: application/json
 
 {
-    "nome": "clara",
-    "email": "clara@email.com",
-    "senha": "000001",
+    "nome": "gabriel",
+    "email": "gbzin@email.com",
+    "senha": "000011",
     "tipo": "comum"
 }
 
 ### login
-POST http://localhost:3333/login
+# @name login
+POST {{baseUrl}}/login
 Content-Type: application/json
 
 { 
 
-"email" : "clara@email.com",
-"senha" : "000001"
+"email" : "gbzin@email.com",
+"senha" : "000011"
 
 }
+
+### rota de segurança
+GET {{baseUrl}}/me
+Authorization: {{authToken}}
+
 ### editar professor
 PUT http://localhost:3333/professores/3
 Content-Type: application/json
@@ -39,7 +47,7 @@ DELETE http://localhost:3333/professores/3
 ### listar favotiros
 GET http://localhost:3333/favoritos
 
-###
+### listar por id
 GET http://localhost:3333/favoritos/2
 
 ### cadastrat favorito

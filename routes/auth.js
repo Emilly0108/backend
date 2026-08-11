@@ -2,7 +2,6 @@ import { prisma } from "../lib/prisma.ts"
 import bcrypt from 'bcrypt'
 
 
-
 export function auth(server){
     server.post('/login', async(request,reply) => {
         const { email, senha } = request.body || {}
@@ -44,5 +43,25 @@ export function auth(server){
         })
 
 
+    })
+
+    server.get("/me", {onRequest: [server.authenticate]}, async(request, reply) =>{
+        const professorId = request.user.id
+
+        const professor = await prisma.professor.findUnique({
+            where: { id: professorId },
+            select: {
+                id: true,
+                nome: true,
+                email: true,
+                tipo: true
+            }
+        })
+
+        if(!professor){
+            return reply.status(404).send({message: "professor não encontrado"})
+        }
+
+        return reply.send(professor)
     })
 }
