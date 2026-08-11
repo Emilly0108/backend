@@ -31,6 +31,22 @@ export function favoritos(server) {
   })
    return reply.status(201).send(favorito)
   })
+
+   server.get('/favoritos/:id', async (request, reply) => {
+    const{id} = request.params
+
+    const favorito = await prisma.favorito.findUnique({
+      where:{
+        id: Number(id)
+      }
+    })
+
+    if(!favorito){
+     return reply.status(404).send({message: "professor não encontrado"})
+    }
+
+    return reply.send(favorito)
+  })
  
 
   server.delete('/favoritos/:id', async (request, reply) =>{
