@@ -2,10 +2,15 @@ import fastify from 'fastify';
 import fastifyMultipart from '@fastify/multipart';
 import fastifyJwt from '@fastify/jwt';
 import fastifyStatic from '@fastify/static';
+import fastifyCors from '@fastify/cors';
 import path from 'path';
 import { router } from '../routes/router';
 
 const app = fastify();
+
+app.register(fastifyCors, {
+    origin: true
+});
 
 app.register(fastifyJwt, {
     secret: process.env.JWT_SECRET as string
