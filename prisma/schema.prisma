@@ -27,10 +27,10 @@ model Favorito {
 }
 
 model Disciplina {
-  id        Int        @id @default(autoincrement()) @map("id_disciplina")
-  nome      String
-  createdAt DateTime   @default(now())
-  materiais Material[]
+  id         Int        @id @default(autoincrement()) @map("id_disciplina")
+  nome       String
+  createdAt  DateTime   @default(now())
+  materiais  Material[]
 
   @@map("disciplinas")
 }

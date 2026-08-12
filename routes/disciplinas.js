@@ -1,43 +1,77 @@
-import { request } from "http"
 import { prisma } from "../lib/prisma.ts"
 export function disciplinas(server){
     server.post('/disciplinas', async(request, reply) => {
         const {nome} = request.body
 
         const disciplina = await prisma.disciplina.create({
-            data:{
-                nome
-            }
-
+            data: { nome }
         })
 
         return disciplina
     })
 
-    server.get('/disciplinas', async (request,reply)=>{
-
+    server.get('/disciplinas', async (request, reply) => {
         const search = request.query.search
 
         const disciplinas = await prisma.disciplina.findMany({
-            where:search?{
-                nome: {contains: search, mode: 'insensitive'}
-            } : undefined
+            where: search ? {
+                nome: { contains: search, mode: 'insensitive' }
+            } : undefined,
+            include: {
+                materiais: {
+                    select: { professorId: true }
+                },
+                _count: {
+                    select: { materiais: true }
+                }
+            }
         })
-        return disciplinas
+
+        const resultado = disciplinas.map(d => {
+            const professoresUnicos = new Set(d.materiais.map(m => m.professorId))
+
+            return {
+                id: d.id,
+                nome: d.nome,
+                materiais: d._count.materiais,
+                questoes: 0,
+                acessos: 0,
+                professores: professoresUnicos.size
+            }
+        })
+
+        return resultado
     })
 
-    server.get('/disciplinas/:id', async (request,reply) =>{
+    server.get('/disciplinas/:id', async (request, reply) => {
         const {id} = request.params;
 
         const disciplina = await prisma.disciplina.findUnique({
-            where: {id:Number(id)}
+            where: {id: Number(id)},
+            include: {
+                materiais: {
+                    select: { professorId: true }
+                },
+                _count: {
+                    select: { materiais: true }
+                }
+            }
         })
 
         if(!disciplina){
             return reply.status(404).send({mensagem: 'Disciplina não encontrada'})
         }
 
-        return reply.status(200).send(disciplina);
+        const professoresUnicos = new Set(disciplina.materiais.map(m => m.professorId))
+
+        return reply.status(200).send({
+            id: disciplina.id,
+            nome: disciplina.nome,
+            materiais: disciplina._count.materiais,
+            questoes: 0,
+            acessos: 0,
+            professores: professoresUnicos.size
+        });
     })
 
     server.put('/disciplinas/:id', async(request, reply)=>{
@@ -55,10 +89,13 @@ export function disciplinas(server){
     server.delete('/disciplinas/:id', async(request, reply) =>{
         const {id} = request.params
 
-        await prisma.disciplina.delete({
-            where: {id: Number(id)}
-        })
-
-        return reply.status(204).send()
+        try{
+            await prisma.disciplina.delete({
+                where: {id: Number(id)}
+            })
+            return reply.status(204).send()
+        } catch (error){
+            return reply.status(404).send({mensagem: 'Disciplina não encontrada'})
+        }
     })
 }
