@@ -3,8 +3,26 @@ export function disciplinas(server){
     server.post('/disciplinas', async(request, reply) => {
         const {nome} = request.body
 
+        const nomeFormatado = nome.trim(); // limpa o texto
+
+        const disciplinaExistente = await prisma.disciplina.findFirst({
+            where: {
+                nome: {
+                    equals: nomeFormatado, // equals é como se fosse "igual a"
+                    mode: 'insensitive' // aceita letras minusculas e maiusculas
+                }
+            }
+        });
+
+        if (disciplinaExistente) { // verifica se a disciplina existe
+            return reply.status(400).send({ 
+                mensagem: 'Já existe uma disciplina cadastrada com esse nome.' 
+            });
+        }
+
+
         const disciplina = await prisma.disciplina.create({
-            data: { nome }
+            data: { nome: nomeFormatado }
         })
 
         return disciplina
