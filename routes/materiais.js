@@ -1,7 +1,6 @@
-
-import { request } from "http";
 import { prisma } from "../lib/prisma.ts"
 export function materiais(server){
+    //cadastrar
     server.post('/materiais', async(request, reply) =>{
         const data = await request.file();
 
@@ -42,9 +41,33 @@ export function materiais(server){
 
         return reply.status(201).send(material);
     })
-
+    //exibe materiais
     server.get('/materiais', async(request, reply) =>{
-        const materiais = await prisma.material.findMany();
+        const materiais = await prisma.material.findMany({
+            where:{
+                status: 'aprovado'
+            },
+            include: {
+                disciplina: true,
+                professor: true
+            }
+        });
+        
+        return reply.status(200).send(materiais);
+    })
+    //usada em materiais em avaliação
+    server.get('/materiais/pendentes', async(request,reply) => {
+        const materiais = await prisma.material.findMany({
+            where:{
+                status: 'pendente'
+            },
+            include:{
+                disciplina: true
+            },
+            orderBy:{
+                createdAt: 'desc'
+            }
+        });
 
         return reply.status(200).send(materiais);
     })
@@ -80,6 +103,40 @@ export function materiais(server){
         });
 
         return reply.status(200).send(material);
+    })
+
+    server.put('/materiais/:id/aprovar', async(request, reply)=>{
+        const { id } = request.params;
+
+        const material = await prisma.material.update({
+            where:{
+                id: Number(id)
+            },
+            data: {
+                status: 'aprovado',
+                motivoRejeicao: null
+            }
+        });
+
+        return reply.status(200).send(material);
+    })
+
+    server.put('/materiais/:id/rejeitar', async(request, reply)=>{
+        const { id }  = request.params;
+
+        const { motivoRejeicao } = request.body;
+
+        const material = await prisma.material.update({
+            where: {
+                id: Number(id)
+            },
+            data:{
+                status: 'rejeitado',
+                motivoRejeicao: motivoRejeicao || null
+            }
+        });
+
+        return reply.status(200).send(material);    
     })
 
     server.delete('/materiais/:id', async(request, reply)=>{

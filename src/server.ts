@@ -8,36 +8,59 @@ import { router } from '../routes/router';
 
 const app = fastify();
 
-app.register(fastifyCors, {
-    origin: true
+
+// CORS
+await app.register(fastifyCors, {
+    origin: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
 });
 
-app.register(fastifyJwt, {
+
+// JWT
+await app.register(fastifyJwt, {
     secret: process.env.JWT_SECRET as string
 });
 
-app.decorate('authenticate', async function(request: any, reply: any){
-    try{
+
+// AUTENTICAÇÃO
+app.decorate('authenticate', async function(request: any, reply: any) {
+    try {
         await request.jwtVerify();
-    } catch(erro){
-        reply.status(401).send({error: 'Token inválido ou ausente'});
+    } catch (erro) {
+        return reply.status(401).send({
+            error: 'Token inválido ou ausente'
+        });
     }
-})
+});
 
-app.register(fastifyMultipart);
 
-app.register(fastifyStatic, {
+// MULTIPART
+await app.register(fastifyMultipart);
+
+
+// ARQUIVOS ESTÁTICOS
+await app.register(fastifyStatic, {
     root: path.join(process.cwd(), 'uploads'),
     prefix: '/uploads/',
 });
 
-app.register(router)
 
-app.listen({port:3333}, (err, address) =>{
-    if(err){
-        console.log(err)
-        process.exit(1)
+// ROTAS
+await app.register(router);
+
+
+// SERVIDOR
+app.listen(
+    {
+        port: 3333
+    },
+    (err, address) => {
+
+        if (err) {
+            console.log(err);
+            process.exit(1);
+        }
+
+        console.log(`Servidor rodando em ${address}`);
     }
-
-    console.log(`Servidor rodando em ${address}`)
-})
+);
