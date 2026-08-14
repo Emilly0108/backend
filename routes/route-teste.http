@@ -11,10 +11,10 @@ POST http://localhost:3333/professores
 Content-Type: application/json
 
 {
-    "nome": "bianca",
-    "email": "bianca@gmail.com",
-    "senha": "123456",
-    "tipo": "comum"
+    "nome": "clarice",
+    "email": "clarice@gmail.com",
+    "senha": "111111",
+    "tipo": "adm"
 }
 
 ### login

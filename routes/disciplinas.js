@@ -1,20 +1,48 @@
 import { prisma } from "../lib/prisma.ts"
 export function disciplinas(server){
+
     server.post('/disciplinas', async(request, reply) => {
-        const {nome} = request.body
+        const {nome, professorId} = request.body
+
+        if (!professorId) {
+            return reply.status(400).send({ mensagem: 'ID do professor é obrigatório.' });
+        }
+
+        if (!nome || typeof nome !== 'string' || !nome.trim()) {
+            return reply.status(400).send({ mensagem: 'O nome da disciplina é obrigatório.' });
+        }
+
+        const professor = await prisma.professor.findUnique({
+            where: {
+                id: Number(professorId)
+            }
+        })
+
+        if(!professor){
+            return reply.status(404).send({
+                mensagem: "professor não encontrado"
+            })
+        }
+
+        if(professor.tipo !== 'adm'){
+            return reply.status(403).send({
+                mensagem: "apenas professores administrativos podem cadastrar disciplinas"
+            })
+        }
 
         const nomeFormatado = nome.trim(); // limpa o texto
 
-        const disciplinaExistente = await prisma.disciplina.findFirst({
+       const disciplinaExistente = await prisma.disciplina.findFirst({
             where: {
                 nome: {
-                    equals: nomeFormatado, // equals é como se fosse "igual a"
-                    mode: 'insensitive' // aceita letras minusculas e maiusculas
+                    equals: nomeFormatado,
+                    mode: 'insensitive'
                 }
             }
         });
-
+       
         if (disciplinaExistente) { // verifica se a disciplina existe
+         
             return reply.status(400).send({ 
                 mensagem: 'Já existe uma disciplina cadastrada com esse nome.' 
             });
@@ -94,26 +122,75 @@ export function disciplinas(server){
 
     server.put('/disciplinas/:id', async(request, reply)=>{
         const {id} = request.params
-        const {nome} = request.body
+        const {nome, professorId} = request.body
 
-        const disciplina = await prisma.disciplina.update({
-            where: {id: Number(id)},
-            data: {nome}
+        const professor = await prisma.professor.findUnique({
+            where: {
+                id: Number(professorId)
+            }
+        })
+
+        if(!professor){
+            return reply.status(404).send({
+                mensagem: "professor não encontrado"
+            })
+        }
+
+        if(professor.tipo !== 'adm'){
+            return reply.status(403).send({
+                mensagem: "apenas professores administrativos podem cadastrar disciplinas"
+            })
+        }
+
+        try{
+
+            const disciplina = await prisma.disciplina.update({
+                where: {id: Number(id)},
+                data: {nome}
         })
 
         return disciplina
+
+        } catch(error){
+            return reply.status(404).send({
+            mensagem: "Disciplina não encontrada"
+            })
+        }
+
     })
+
 
     server.delete('/disciplinas/:id', async(request, reply) =>{
-        const {id} = request.params
+    const { id } = request.params
+    const professorId = request.body?.professorId || request.query?.professorId
 
-        try{
-            await prisma.disciplina.delete({
-                where: {id: Number(id)}
-            })
-            return reply.status(204).send()
-        } catch (error){
-            return reply.status(404).send({mensagem: 'Disciplina não encontrada'})
+    const professor = await prisma.professor.findUnique({
+        where: {
+            id: Number(professorId)
         }
     })
+
+    if (!professor) {
+        return reply.status(404).send({
+            mensagem: 'Professor não encontrado.'
+        })
+    }
+
+    if (professor.tipo !== 'adm') {
+        return reply.status(403).send({
+            mensagem: 'Apenas professores administradores podem excluir disciplinas.'
+        })
+    }
+
+    try {
+        await prisma.disciplina.delete({
+            where: { id: Number(id) }
+        });
+
+        return reply.status(204).send()
+    } catch (error) {
+        return reply.status(404).send({ mensagem: 'Disciplina não encontrada.' })
+    }
+    })
+
 }
