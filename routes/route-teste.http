@@ -117,7 +117,8 @@ Content-Type: application/json
 
 {
 
-    "nome" : "Práticas de campo"
+    "nome" : "topografia",
+    "professorId": 8
 
 }
 

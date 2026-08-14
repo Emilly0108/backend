@@ -32,20 +32,18 @@ export function disciplinas(server){
 
         const nomeFormatado = nome.trim(); // limpa o texto
 
-       const disciplinaExistente = await prisma.disciplina.findFirst({
-            where: {
-                nome: {
-                    equals: nomeFormatado,
-                    mode: 'insensitive'
-                }
-            }
-        });
+       const todasDisciplinas = await prisma.disciplina.findMany();
+
+        // Compara em minúsculas (ignora "Pedra", "pedra", "PEDRA")
+        const disciplinaExistente = todasDisciplinas.find(
+            d => d.nome.trim().toLowerCase() === nomeFormatado.toLowerCase()
+        )
        
         if (disciplinaExistente) { // verifica se a disciplina existe
          
             return reply.status(400).send({ 
                 mensagem: 'Já existe uma disciplina cadastrada com esse nome.' 
-            });
+            })
         }
 
 
