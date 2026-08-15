@@ -11,10 +11,10 @@ POST http://localhost:3333/professores
 Content-Type: application/json
 
 {
-    "nome": "clarice",
-    "email": "clarice@gmail.com",
-    "senha": "111111",
-    "tipo": "adm"
+    "nome": "bianca",
+    "email": "bianca@gmail.com",
+    "senha": "123456",
+    "tipo": "comum"
 }
 
 ### login
@@ -82,7 +82,7 @@ Content-Disposition: form-data; name="disciplinaId"
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="professorId"
 
-11
+1
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="file"; filename="aula1.pdf"
 Content-Type: application/pdf
@@ -118,7 +118,7 @@ Content-Type: application/json
 {
 
     "nome" : "topografia",
-    "professorId": 8
+    "professorId": 1
 
 }
 

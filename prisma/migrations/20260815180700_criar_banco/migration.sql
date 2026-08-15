@@ -18,20 +18,20 @@ CREATE TABLE "favoritos" (
 );
 
 -- CreateTable
-CREATE TABLE "Disciplina" (
+CREATE TABLE "disciplinas" (
     "id_disciplina" SERIAL NOT NULL,
     "nome" TEXT NOT NULL,
-    "descricao" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "Disciplina_pkey" PRIMARY KEY ("id_disciplina")
+    CONSTRAINT "disciplinas_pkey" PRIMARY KEY ("id_disciplina")
 );
 
 -- CreateTable
-CREATE TABLE "Material" (
+CREATE TABLE "materiais" (
     "id_material" SERIAL NOT NULL,
     "titulo" TEXT NOT NULL,
     "descricao" TEXT NOT NULL,
+    "palavrasChave" TEXT NOT NULL,
     "url" TEXT NOT NULL,
     "status" TEXT NOT NULL,
     "motivoRejeicao" TEXT,
@@ -39,17 +39,17 @@ CREATE TABLE "Material" (
     "professorId" INTEGER NOT NULL,
     "disciplinaId" INTEGER NOT NULL,
 
-    CONSTRAINT "Material_pkey" PRIMARY KEY ("id_material")
+    CONSTRAINT "materiais_pkey" PRIMARY KEY ("id_material")
 );
 
 -- CreateIndex
 CREATE UNIQUE INDEX "professores_email_key" ON "professores"("email");
 
 -- AddForeignKey
-ALTER TABLE "favoritos" ADD CONSTRAINT "favoritos_id_material_fkey" FOREIGN KEY ("id_material") REFERENCES "Material"("id_material") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "favoritos" ADD CONSTRAINT "favoritos_id_material_fkey" FOREIGN KEY ("id_material") REFERENCES "materiais"("id_material") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Material" ADD CONSTRAINT "Material_professorId_fkey" FOREIGN KEY ("professorId") REFERENCES "professores"("id_professor") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "materiais" ADD CONSTRAINT "materiais_disciplinaId_fkey" FOREIGN KEY ("disciplinaId") REFERENCES "disciplinas"("id_disciplina") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Material" ADD CONSTRAINT "Material_disciplinaId_fkey" FOREIGN KEY ("disciplinaId") REFERENCES "Disciplina"("id_disciplina") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "materiais" ADD CONSTRAINT "materiais_professorId_fkey" FOREIGN KEY ("professorId") REFERENCES "professores"("id_professor") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -1,47 +1,83 @@
 import { prisma } from "../lib/prisma.ts"
 export function materiais(server){
     //cadastrar
-    server.post('/materiais', async(request, reply) =>{
-        const data = await request.file();
-
-        if(!data){
-            return reply.status(400).send({error: 'Nenhum arquivo enviado'});
-
-        }
-
-        const titulo = data.fields.titulo?.value;
-        const descricao = data.fields.descricao?.value;
-        const disciplinaId = data.fields.disciplinaId?.value;
-
-        if(!titulo || !descricao || !disciplinaId){
-            return reply.status(400).send({error: 'Campos obrigatórios faltando'}); 
-        }
-
-        const professorId = data.fields.professorId?.value;
-
-        const nomeArquivo = `${Date.now()}-${data.filename}`;
-        const caminhoDestino = `uploads/${nomeArquivo}`;
+    server.post('/materiais', async (request, reply) => {
+        let titulo = '';
+        let descricao = '';
+        let palavrasChave = '';
+        let disciplinaId = '';
+        let professorId = '';
+        let caminhoDestino = '';
 
         const fs = await import('fs');
-        const {pipeline} = await import ('stream/promises');
+        const { pipeline } = await import('stream/promises');
 
-        fs.mkdirSync('uploads', {recursive: true});
-        await pipeline(data.file, fs.createWriteStream(caminhoDestino));
+        fs.mkdirSync('uploads', { recursive: true });
 
-        const material = await prisma.material.create({
-            data:{
-                titulo,
-                descricao,
-                url: caminhoDestino,
-                status: 'pendente',
-                professorId: Number(professorId),
-                disciplinaId: Number(disciplinaId),
-            },
+        const partes = request.parts();
+
+        for await (const parte of partes) {
+
+            if (parte.type === 'file') {
+                const nomeArquivo = `${Date.now()}-${parte.filename}`;
+                caminhoDestino = `uploads/${nomeArquivo}`;
+
+                await pipeline(
+                parte.file,
+                fs.createWriteStream(caminhoDestino)
+            );
+
+            } else {
+                if (parte.fieldname === 'titulo') {
+                    titulo = parte.value;
+                }
+
+                if (parte.fieldname === 'descricao') {
+                    descricao = parte.value;
+                }
+
+                if (parte.fieldname === 'palavrasChave') {
+                    palavrasChave = parte.value;
+                }
+
+                if (parte.fieldname === 'disciplinaId') {
+                    disciplinaId = parte.value;
+                }
+
+                if (parte.fieldname === 'professorId') {
+                    professorId = parte.value;
+                }
+            }
+    }
+
+    if (!titulo || !descricao || !disciplinaId || !professorId) {
+        return reply.status(400).send({
+            error: 'Campos obrigatórios faltando'
         });
+    }
 
-        return reply.status(201).send(material);
-    })
-    //exibe materiais
+    if (!caminhoDestino) {
+        return reply.status(400).send({
+            error: 'Nenhum arquivo enviado'
+        });
+    }
+
+    const material = await prisma.material.create({
+        data: {
+            titulo,
+            descricao,
+            palavrasChave,
+            url: caminhoDestino,
+            status: 'pendente',
+            professorId: Number(professorId),
+            disciplinaId: Number(disciplinaId)
+        }
+    });
+
+    return reply.status(201).send(material);
+});    
+
+//exibe materiais
     server.get('/materiais', async(request, reply) =>{
         const materiais = await prisma.material.findMany({
             where:{
@@ -53,6 +89,20 @@ export function materiais(server){
             }
         });
         
+        return reply.status(200).send(materiais);
+    })
+
+    server.get('/materiais/todos', async (request, reply) => {
+        const materiais = await prisma.material.findMany({
+            include: { 
+                disciplina: true,
+                professor: true
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+
         return reply.status(200).send(materiais);
     })
     //usada em materiais em avaliação
