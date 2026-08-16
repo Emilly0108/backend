@@ -61,31 +61,43 @@ export function disciplinas(server){
             where: search ? {
                 nome: { contains: search, mode: 'insensitive' }
             } : undefined,
+
             include: {
                 materiais: {
-                    select: { professorId: true }
-                },
-                _count: {
-                    select: { materiais: true }
+                    select: {
+                     professorId: true
+                    }
+            },
+
+            _count: {
+                select: {
+                    materiais: {
+                        where: {
+                            status: 'aprovado'
+                        }
+                    }
                 }
             }
-        })
-
-        const resultado = disciplinas.map(d => {
-            const professoresUnicos = new Set(d.materiais.map(m => m.professorId))
-
-            return {
-                id: d.id,
-                nome: d.nome,
-                materiais: d._count.materiais,
-                questoes: 0,
-                acessos: 0,
-                professores: professoresUnicos.size
-            }
-        })
-
-        return resultado
+        }
     })
+
+    const resultado = disciplinas.map(d => {
+        const professoresUnicos = new Set(
+            d.materiais.map(m => m.professorId)
+        )
+
+        return {
+            id: d.id,
+            nome: d.nome,
+            materiais: d._count.materiais,
+            questoes: 0,
+            acessos: 0,
+            professores: professoresUnicos.size
+        }
+    })
+
+    return resultado
+})
 
     server.get('/disciplinas/:id', async (request, reply) => {
         const {id} = request.params;
