@@ -78,20 +78,33 @@ export function materiais(server){
 });    
 
 //exibe materiais
-    server.get('/materiais', async(request, reply) =>{
-        const materiais = await prisma.material.findMany({
-            where:{
-                status: 'aprovado'
-            },
-            include: {
-                disciplina: true,
-                professor: true
-            }
-        });
-        
-        return reply.status(200).send(materiais);
-    })
+   server.get('/materiais', async (request, reply) => {
 
+    const { disciplinaId } = request.query;
+
+    const materiais = await prisma.material.findMany({
+        where: {
+            status: 'aprovado',
+
+            ...(disciplinaId
+                ? {
+                    disciplinaId: Number(disciplinaId)
+                }
+                : {})
+        },
+
+        include: {
+            disciplina: true,
+            professor: true
+        },
+
+        orderBy: {
+            createdAt: 'desc'
+        }
+    });
+
+    return reply.status(200).send(materiais);
+});
     server.get('/materiais/todos', async (request, reply) => {
         const materiais = await prisma.material.findMany({
             include: { 
