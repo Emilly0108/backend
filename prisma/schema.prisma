@@ -13,6 +13,8 @@ model Professor {
   email     String     @unique
   senha     String
   tipo      String
+  resetToken String? @map("reset_token")
+  resetTokenExpira DateTime? @map("reset_token_expira") 
   materiais Material[]
 
   @@map("professores")
