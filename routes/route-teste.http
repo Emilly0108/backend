@@ -11,10 +11,10 @@ POST http://localhost:3333/professores
 Content-Type: application/json
 
 {
-    "nome": "bianca",
-    "email": "bianca@gmail.com",
+    "nome": "duclce",
+    "email": "dulcia@gmail.com",
     "senha": "123456",
-    "tipo": "comum"
+    "tipo": "adm"
 }
 
 ### login
@@ -94,7 +94,7 @@ Content-Type: application/pdf
 GET http://localhost:3333/materiais
 
 ### listar materiais por id
-GET http://localhost:3333/materiais/5
+GET http://localhost:3333/materiais/6
 
 ### atualizar materiais
 PUT http://localhost:3333/materiais/6
@@ -117,7 +117,7 @@ Content-Type: application/json
 
 {
 
-    "nome" : "topografia",
+    "nome" : "Geologia Geral",
     "professorId": 1
 
 }
@@ -126,7 +126,7 @@ Content-Type: application/json
 GET http://localhost:3333/disciplinas
 
 ### listar disciplinas por id
-GET http://localhost:3333/disciplinas/25
+GET http://localhost:3333/disciplinas/1
 
 ### atualizar disciplinas
 PUT http://localhost:3333/disciplinas/1
@@ -134,8 +134,9 @@ Content-Type: application/json
 
 { 
 
-    "nome": "Mineralogia"
+    "nome": "Topografia"
+
 }
 
 ### deletar disciplinas
-DELETE http://localhost:3333/disciplinas/25
+DELETE http://localhost:3333/disciplinas/1

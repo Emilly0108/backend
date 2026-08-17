@@ -11,7 +11,11 @@ export function favoritos(server) {
       }
     } : undefined,
     include: {
-      material: true // Traz os dados do material filtrado
+      material: {
+        include: {
+          disciplina: true
+        }
+      } 
     }
   })
 
