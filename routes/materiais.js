@@ -1,3 +1,4 @@
+import { error } from "console";
 import { prisma } from "../lib/prisma.ts"
 export function materiais(server){
     //cadastrar
@@ -192,6 +193,12 @@ export function materiais(server){
     server.put('/materiais/:id/aprovar', async(request, reply)=>{
         const { id } = request.params;
 
+        const usuarioTipo = request.headers['x-usuario-tipo']
+
+        if(usuarioTipo !== 'adm'){
+            return reply.status(403).send({ error: 'Acesso negado. Apenas administradosres podem aprovar'})
+        }
+
         const material = await prisma.material.update({
             where:{
                 id: Number(id)
@@ -207,6 +214,12 @@ export function materiais(server){
 
     server.put('/materiais/:id/rejeitar', async(request, reply)=>{
         const { id }  = request.params;
+
+        const usuarioTipo = request.headers['x-usuario-tipo']
+
+        if(usuarioTipo !== 'adm'){
+            return reply.status(403).send({ error: 'Acesso negado. Apenas administradosres podem aprovar'})
+        }
 
         const { motivoRejeicao } = request.body;
 
