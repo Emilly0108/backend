@@ -39,7 +39,6 @@ export function materiais(server){
                 if (parte.fieldname === 'palavrasChave') {
                     palavrasChave = parte.value;
                 }
-
                 if (parte.fieldname === 'disciplinaId') {
                     disciplinaId = parte.value;
                 }
@@ -135,6 +134,26 @@ export function materiais(server){
         return reply.status(200).send(materiais);
     })
 
+    server.get('/materiais/meus/:professorId', async (request, reply) =>{
+        const {professorId} = request.params
+
+        const materiais = await prisma.material.findMany({
+            where: {
+                professorId: Number(professorId),
+                status: 'aprovado'
+            },
+            include: {
+                disciplina: true,
+                professor: true
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        })
+
+        return reply.status(200).send(materiais)
+    })
+
     server.get('/materiais/:id', async(request, reply) =>{
         const {id} = request.params;
 
@@ -152,7 +171,7 @@ export function materiais(server){
     server.put('/materiais/:id', async(request, reply) =>{
         const {id} = request.params;
 
-        const {titulo, descricao, disciplinaId} = request.body;
+        const {titulo, descricao, disciplinaId, palavrasChave} = request.body;
 
         const material = await prisma.material.update({
             where:{
@@ -161,7 +180,9 @@ export function materiais(server){
             data: {
                 titulo,
                 descricao,
+                palavrasChave,
                 disciplinaId: Number(disciplinaId)
+                
             }
         });
 
