@@ -1,245 +1,323 @@
 import { prisma } from "../lib/prisma.ts"
-import bcrypt from "bcrypt"
-import crypto from "crypto"
-import { enviarEmailRecuperacao } from "../lib/email.js"
+import { OAuth2Client } from "google-auth-library"
 
 console.log(">>> AUTH.JS FOI CARREGADO")
 
+
+// =====================================================
+// CONFIGURAÇÃO DO GOOGLE
+// =====================================================
+
+const GOOGLE_CLIENT_ID =
+    "102302103057-v175sj9qktdd2p09qhfv0koaj9bkj0a3.apps.googleusercontent.com"
+
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID)
+
+
+
 export function auth(server) {
-    
-    // =========================
-    // LOGIN
-    // =========================
-    server.post('/login', async (request, reply) => {
 
-        const { email, senha } = request.body || {}
+    // =================================================
+    // LOGIN / CADASTRO COM GOOGLE
+    // =================================================
 
-        if (!email || !senha) {
-            return reply.status(400).send({
-                error: "Email e senha são obrigatórios"
-            })
-        }
+    server.post('/login/google', async (request, reply) => {
 
-        const professor = await prisma.professor.findUnique({
-            where: { email }
-        })
+        try {
 
-        if (!professor) {
-            return reply.status(401).send({
-                error: "Email ou senha inválidos"
-            })
-        }
-
-        const senhaValida = await bcrypt.compare(
-            senha,
-            professor.senha
-        )
-
-        if (!senhaValida) {
-            return reply.status(401).send({
-                error: "Email ou senha inválidos"
-            })
-        }
-
-        const token = server.jwt.sign(
-            {
-                id: professor.id,
-                email: professor.email,
-                tipo: professor.tipo
-            },
-            {
-                expiresIn: '7d'
-            }
-        )
-
-        return reply.send({
-            token,
-            professor: {
-                id: professor.id,
-                nome: professor.nome,
-                email: professor.email,
-                tipo: professor.tipo
-            }
-        })
-    })
+            console.log("====================================")
+            console.log(">>> ROTA /login/google")
+            console.log("====================================")
 
 
-    // =========================
-    // ESQUECI A SENHA
-    // =========================
-server.post('/esqueci-senha', async (request, reply) => {
-
-    console.log(">>> 1. ROTA /esqueci-senha FOI CHAMADA")
-
-    try {
-
-        const { email } = request.body || {}
-
-        console.log(">>> 2. Email recebido:", email)
-
-        if (!email) {
-            return reply.status(400).send({
-                error: "Email é obrigatório"
-            })
-        }
-
-        console.log(">>> 3. Buscando professor no banco...")
-
-        const professor = await prisma.professor.findUnique({
-            where: { email }
-        })
-
-        console.log(">>> 4. Professor encontrado:", professor ? professor.id : "NÃO ENCONTRADO")
-
-        if (!professor) {
-            return reply.send({
-                message: "Se o email estiver cadastrado, você receberá um link para redefinir sua senha."
-            })
-        }
-
-        console.log(">>> 5. Gerando token...")
-
-        const resetToken = crypto.randomBytes(32).toString("hex")
-
-        const resetTokenExpira = new Date(
-            Date.now() + 60 * 60 * 1000
-        )
-
-        console.log(">>> 6. Token gerado")
-
-        console.log(">>> 7. Salvando token no banco...")
-
-        await prisma.professor.update({
-            where: {
-                id: professor.id
-            },
-            data: {
-                resetToken,
-                resetTokenExpira
-            }
-        })
-
-        console.log(">>> 8. Token salvo no banco")
-
-        const link = `http://127.0.0.1:5500/login/redefinir_senha.html?token=${resetToken}`
-
-        console.log(">>> 9. Link criado:", link)
-
-        console.log(">>> 10. Enviando email...")
-
-        await enviarEmailRecuperacao(
-            professor.email,
-            link
-        )
-
-        console.log(">>> 11. Email enviado com sucesso!")
-
-        return reply.send({
-            message: "Se o email estiver cadastrado, você receberá um link para redefinir sua senha."
-        })
-
-    } catch (error) {
-
-        console.error(">>> ERRO NA RECUPERAÇÃO DE SENHA:")
-        console.error(error)
-
-        return reply.status(500).send({
-            error: "Erro interno ao solicitar recuperação de senha."
-        })
-    }
-})
-
-    // =========================
-    // REDEFINIR SENHA
-    // =========================
-    server.post('/redefinir-senha', async (request, reply) => {
-
-        const { token, novaSenha } = request.body || {}
-
-        if (!token || !novaSenha) {
-            return reply.status(400).send({
-                error: "Token e nova senha são obrigatórios"
-            })
-        }
-
-        // Procura o professor pelo token
-        const professor = await prisma.professor.findFirst({
-            where: {
-                resetToken: token
-            }
-        })
-
-        if (!professor) {
-            return reply.status(400).send({
-                error: "Token inválido ou expirado"
-            })
-        }
-
-        // Verifica se o token expirou
-        if (
-            !professor.resetTokenExpira ||
-            professor.resetTokenExpira < new Date()
-        ) {
-            return reply.status(400).send({
-                error: "Token inválido ou expirado"
-            })
-        }
-
-        // Criptografa a nova senha
-        const novaSenhaHash = await bcrypt.hash(
-            novaSenha,
-            10
-        )
-
-        // Atualiza a senha e limpa o token
-        await prisma.professor.update({
-            where: {
-                id: professor.id
-            },
-            data: {
-                senha: novaSenhaHash,
-                resetToken: null,
-                resetTokenExpira: null
-            }
-        })
-
-        return reply.send({
-            message: "Senha redefinida com sucesso!"
-        })
-    })
+            const { credential } = request.body || {}
 
 
-    // =========================
-    // ME
-    // =========================
-    server.get(
-        "/me",
-        {
-            onRequest: [server.authenticate]
-        },
-        async (request, reply) => {
+            // -----------------------------------------
+            // VERIFICA SE O CREDENTIAL FOI RECEBIDO
+            // -----------------------------------------
 
-            const professorId = request.user.id
+            if (!credential) {
 
-            const professor = await prisma.professor.findUnique({
-                where: {
-                    id: professorId
-                },
-                select: {
-                    id: true,
-                    nome: true,
-                    email: true,
-                    tipo: true
-                }
-            })
+                console.log(
+                    ">>> ❌ Credential do Google não recebido"
+                )
 
-            if (!professor) {
-                return reply.status(404).send({
-                    message: "Professor não encontrado"
+                return reply.status(400).send({
+                    error: "Credential do Google não foi informado"
                 })
             }
 
-            return reply.send(professor)
+
+            console.log(
+                ">>> Credential recebido"
+            )
+
+
+            // -----------------------------------------
+            // VERIFICA O TOKEN DO GOOGLE
+            // -----------------------------------------
+
+            const ticket = await googleClient.verifyIdToken({
+
+                idToken: credential,
+
+                audience: GOOGLE_CLIENT_ID
+
+            })
+
+
+            const payload = ticket.getPayload()
+
+
+            if (!payload) {
+
+                console.log(
+                    ">>> ❌ Payload do Google não encontrado"
+                )
+
+                return reply.status(401).send({
+                    error: "Token do Google inválido"
+                })
+            }
+
+
+            // -----------------------------------------
+            // DADOS VINDOS DO GOOGLE
+            // -----------------------------------------
+
+            const {
+                email,
+                name,
+                email_verified
+            } = payload
+
+
+            console.log(
+                ">>> Dados recebidos do Google:",
+                {
+                    email,
+                    name,
+                    email_verified
+                }
+            )
+
+
+            // -----------------------------------------
+            // VALIDA O E-MAIL
+            // -----------------------------------------
+
+            if (!email) {
+
+                return reply.status(401).send({
+                    error: "O Google não informou o e-mail do usuário"
+                })
+            }
+
+
+            if (!email_verified) {
+
+                return reply.status(401).send({
+                    error: "O e-mail do Google não foi verificado"
+                })
+            }
+
+
+            // -----------------------------------------
+            // PROCURA O PROFESSOR PELO E-MAIL
+            // -----------------------------------------
+
+            let professor = await prisma.professor.findUnique({
+
+                where: {
+                    email: email
+                }
+
+            })
+
+
+            // -----------------------------------------
+            // SE NÃO EXISTIR, CRIA
+            // -----------------------------------------
+
+            if (!professor) {
+
+                console.log(
+                    ">>> Professor não encontrado."
+                )
+
+                console.log(
+                    ">>> Criando novo professor..."
+                )
+
+
+                professor = await prisma.professor.create({
+
+                    data: {
+
+                        nome: name || "Usuário Google",
+
+                        email: email,
+
+                        tipo: "comum",
+
+                        senha: null
+
+                    }
+
+                })
+
+
+                console.log(
+                    ">>> ✅ Professor criado:",
+                    professor.id
+                )
+
+            } else {
+
+                console.log(
+                    ">>> ✅ Professor já cadastrado:",
+                    professor.id
+                )
+
+            }
+
+
+            // -----------------------------------------
+            // GERA O JWT DO GEOCONNECT
+            // -----------------------------------------
+
+            const token = server.jwt.sign(
+
+                {
+                    id: professor.id,
+                    email: professor.email,
+                    tipo: professor.tipo
+                },
+
+                {
+                    expiresIn: "7d"
+                }
+
+            )
+
+
+            console.log(
+                ">>> ✅ JWT gerado"
+            )
+
+
+            // -----------------------------------------
+            // ENVIA PARA O FRONTEND
+            // -----------------------------------------
+
+            return reply.send({
+
+                token,
+
+                professor: {
+
+                    id: professor.id,
+
+                    nome: professor.nome,
+
+                    email: professor.email,
+
+                    tipo: professor.tipo
+
+                }
+
+            })
+
+
+        } catch (error) {
+
+            console.error(
+                "===================================="
+            )
+
+            console.error(
+                ">>> ❌ ERRO NO LOGIN COM GOOGLE"
+            )
+
+            console.error(error)
+
+            console.error(
+                "===================================="
+            )
+
+
+            return reply.status(401).send({
+
+                error:
+                    "Não foi possível autenticar com o Google."
+
+            })
+
         }
+
+    })
+
+
+
+    // =================================================
+    // USUÁRIO LOGADO
+    // =================================================
+
+    server.get(
+
+        "/me",
+
+        {
+            onRequest: [server.authenticate]
+        },
+
+        async (request, reply) => {
+
+
+            const professorId = request.user.id
+
+
+            const professor =
+                await prisma.professor.findUnique({
+
+                    where: {
+
+                        id: professorId
+
+                    },
+
+                    select: {
+
+                        id: true,
+
+                        nome: true,
+
+                        email: true,
+
+                        tipo: true
+
+                    }
+
+                })
+
+
+            if (!professor) {
+
+                return reply.status(404).send({
+
+                    message:
+                        "Professor não encontrado"
+
+                })
+
+            }
+
+
+            return reply.send(professor)
+
+        }
+
     )
+
 }
