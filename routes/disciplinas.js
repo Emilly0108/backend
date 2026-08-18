@@ -1,7 +1,7 @@
 import { prisma } from "../lib/prisma.ts"
 export function disciplinas(server){
 
-    server.post('/disciplinas', async(request, reply) => {
+    server.post('/disciplinas', { onRequest: [server.authenticate] }, async(request, reply) => {
         const {nome, professorId} = request.body
 
         if (!professorId) {
@@ -130,7 +130,7 @@ export function disciplinas(server){
         });
     })
 
-    server.put('/disciplinas/:id', async(request, reply)=>{
+    server.put('/disciplinas/:id', { onRequest: [server.authenticate] }, async(request, reply)=>{
         const {id} = request.params
         const {nome, professorId} = request.body
 
@@ -170,7 +170,7 @@ export function disciplinas(server){
     })
 
 
-    server.delete('/disciplinas/:id', async(request, reply) =>{
+    server.delete('/disciplinas/:id', { onRequest: [server.authenticate] }, async(request, reply) =>{
     const { id } = request.params
     const professorId = request.body?.professorId || request.query?.professorId
 

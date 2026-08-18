@@ -2,7 +2,7 @@ import { error } from "console";
 import { prisma } from "../lib/prisma.ts"
 export function materiais(server){
     //cadastrar
-    server.post('/materiais', async (request, reply) => {
+    server.post('/materiais', { onRequest: [server.authenticate] }, async (request, reply) => {
         let titulo = '';
         let descricao = '';
         let palavrasChave = '';
@@ -169,7 +169,7 @@ export function materiais(server){
         return reply.status(200).send(material);
     } )
 
-    server.put('/materiais/:id', async(request, reply) =>{
+    server.put('/materiais/:id', { onRequest: [server.authenticate] }, async(request, reply) =>{
         const {id} = request.params;
 
         const {titulo, descricao, disciplinaId, palavrasChave} = request.body;
@@ -190,12 +190,10 @@ export function materiais(server){
         return reply.status(200).send(material);
     })
 
-    server.put('/materiais/:id/aprovar', async(request, reply)=>{
+    server.put('/materiais/:id/aprovar', { onRequest: [server.authenticate] }, async(request, reply)=>{
         const { id } = request.params;
 
-        const usuarioTipo = request.headers['x-usuario-tipo']
-
-        if(usuarioTipo !== 'adm'){
+        if(request.user?.tipo !== 'adm'){
             return reply.status(403).send({ error: 'Acesso negado. Apenas administradosres podem aprovar'})
         }
 
@@ -212,12 +210,10 @@ export function materiais(server){
         return reply.status(200).send(material);
     })
 
-    server.put('/materiais/:id/rejeitar', async(request, reply)=>{
+    server.put('/materiais/:id/rejeitar', { onRequest: [server.authenticate] }, async(request, reply)=>{
         const { id }  = request.params;
 
-        const usuarioTipo = request.headers['x-usuario-tipo']
-
-        if(usuarioTipo !== 'adm'){
+        if(request.user?.tipo !== 'adm'){
             return reply.status(403).send({ error: 'Acesso negado. Apenas administradosres podem aprovar'})
         }
 
@@ -236,7 +232,7 @@ export function materiais(server){
         return reply.status(200).send(material);    
     })
 
-    server.delete('/materiais/:id', async(request, reply)=>{
+    server.delete('/materiais/:id', { onRequest: [server.authenticate] }, async(request, reply)=>{
         const {id} = request.params
 
         await prisma.material.delete({

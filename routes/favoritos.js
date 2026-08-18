@@ -23,7 +23,7 @@ export function favoritos(server) {
 
 })
 
-  server.post('/favoritos', async (request, reply) => {
+  server.post('/favoritos', { onRequest: [server.authenticate] }, async (request, reply) => {
     const {id_material} = request.body
 
     const favorito = await prisma.favorito.create({
@@ -53,7 +53,7 @@ export function favoritos(server) {
   })
  
 
-  server.delete('/favoritos/:id', async (request, reply) =>{
+  server.delete('/favoritos/:id', { onRequest: [server.authenticate] }, async (request, reply) =>{
     const { id } = request.params
 
     await prisma.favorito.delete({

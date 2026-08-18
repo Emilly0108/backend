@@ -18,9 +18,15 @@ await app.register(fastifyCors, {
 
 // JWT
 await app.register(fastifyJwt, {
-    secret: process.env.JWT_SECRET as string
+    secret: process.env.JWT_SECRET || 'chave_de_emergencia_caso_env_falhe'
 });
 
+await app.register(fastifyMultipart)
+
+await app.register(fastifyStatic, {
+    root: path.join(__dirname, '../uploads'),
+    prefix: '/uploads/'
+})
 
 // AUTENTICAÇÃO
 app.decorate('authenticate', async function(request: any, reply: any) {
@@ -32,18 +38,6 @@ app.decorate('authenticate', async function(request: any, reply: any) {
         });
     }
 });
-
-
-// MULTIPART
-await app.register(fastifyMultipart);
-
-
-// ARQUIVOS ESTÁTICOS
-await app.register(fastifyStatic, {
-    root: path.join(process.cwd(), 'uploads'),
-    prefix: '/uploads/',
-});
-
 
 // ROTAS
 await app.register(router);

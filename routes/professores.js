@@ -14,7 +14,7 @@ export function professores(server) {
 })
    
 
-  server.post('/professores', async (request, reply) => {
+  server.post('/professores',{ onRequest: [server.authenticate] }, async (request, reply) => {
     const {nome, email, senha, tipo} = request.body
 
     const professorExistente = await prisma.professor.findUnique({
@@ -57,7 +57,7 @@ export function professores(server) {
     return reply.send(professor)
   })
 
-  server.put('/professores/:id', async (request, reply)=>{
+  server.put('/professores/:id', { onRequest: [server.authenticate] }, async (request, reply)=>{
     const { id } = request.params
     const { nome, email,senha, tipo } = request.body
 
@@ -80,7 +80,7 @@ export function professores(server) {
     return reply.send(professorAtualizado)
   })
 
-  server.delete('/professores/:id', async (request, reply) =>{
+  server.delete('/professores/:id', { onRequest: [server.authenticate] }, async (request, reply) =>{
     const {id} = request.params
 
     await prisma.professor.delete({
