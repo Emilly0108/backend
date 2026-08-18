@@ -12,7 +12,7 @@ Content-Type: application/json
 
 {
     "nome": "Bianca",
-    "email": "biancagabriely.santos@gmail.com",
+    "email": "bianca.gabriely@escolar.ifrn.edu.br",
     "senha": "11062008Aluna#",
     "tipo": "comum"
 }

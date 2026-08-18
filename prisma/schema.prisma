@@ -11,7 +11,7 @@ model Professor {
   id        Int        @id @default(autoincrement()) @map("id_professor")
   nome      String
   email     String     @unique
-  senha     String
+  senha     String?
   tipo      String
   resetToken String? @map("reset_token")
   resetTokenExpira DateTime? @map("reset_token_expira") 
