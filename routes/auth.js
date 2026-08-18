@@ -6,7 +6,55 @@ import { enviarEmailRecuperacao } from "../lib/email.js"
 console.log(">>> AUTH.JS FOI CARREGADO")
 
 export function auth(server) {
-    
+    // =========================
+    // Cadastro
+    // =========================
+    server.post('/cadastro', async(request, reply)=>{
+        try{
+            const {nome,email,senha} = request.body || {}
+
+            if (!nome || !email || !senha){
+                return reply.status(400).send({error: "Nome, email e senha dão obrigatórios."})
+            }
+
+            const usuarioExistente = await prisma.professor.findUnique({
+                where:{
+                    email
+                }
+            })
+
+            if(usuarioExistente){
+                return reply.status(409).send({ error: "este e-mail já está cadastrado no sistema"})
+            }
+
+            const senhaHash = await bcrypt.hash(senha, 10)
+
+            const novoProfessor = await prisma.professor.create({
+                data: {
+                    nome, 
+                    email,
+                    senha: senhaHash,
+                    tipo: "Professor"
+                },
+                select:{
+                    id: true,
+                    nome: true,
+                    email: true
+                }
+            })
+
+            return reply.status(201).send({
+                message: "Cadastro realizado com sucesso!",
+                user: novoProfessor
+            })
+        }catch (error){
+            console.error("ERRO NO CADASTRO", error)
+            return reply.status(500).send({
+                error: "erro interno no servidor ao realizar cadastro"
+            })
+        }
+
+    })
     // =========================
     // LOGIN
     // =========================
