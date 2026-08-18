@@ -46,7 +46,7 @@ export function favoritos(server) {
     })
 
     if(!favorito){
-     return reply.status(404).send({message: "professor não encontrado"})
+     return reply.status(404).send({message: "material favorito não encontrado"})
     }
 
     return reply.send(favorito)
@@ -62,4 +62,5 @@ export function favoritos(server) {
 
     return reply.status(204).send()
   })
+  return
 }
