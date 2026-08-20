@@ -16,6 +16,7 @@ model Professor {
   resetToken String? @map("reset_token")
   resetTokenExpira DateTime? @map("reset_token_expira") 
   materiais Material[]
+  favoritos Favorito[]
 
   @@map("professores")
 }
@@ -23,7 +24,10 @@ model Professor {
 model Favorito {
   id         Int      @id @default(autoincrement()) @map("id_favorito")
   idMaterial Int      @map("id_material")
+  idUsuario  Int?      @map("id_usuario")
+
   material   Material @relation(fields: [idMaterial], references: [id])
+  usuario    Professor? @relation(fields: [idUsuario], references: [id])
 
   @@map("favoritos")
 }
