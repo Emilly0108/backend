@@ -1,9 +1,12 @@
 node_modules
 /src/generated/prisma
-/uploads/*
+
+/uploads/**
+/arquivos
 *.env
 *-lock.json
 .vscode/
 .claude/
 .agents/
 .windsurf/
+/dist
