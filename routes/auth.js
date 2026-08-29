@@ -311,7 +311,7 @@ export function auth(server) {
       // ENVIA E-MAIL
       // -----------------------------------------
 
-      enviarEmailRecuperacao(professor.email, link);
+      await enviarEmailRecuperacao(professor.email, link);
 
       console.log(">>> ✅ E-mail de recuperação enviado");
 
