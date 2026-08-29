@@ -30,9 +30,9 @@ export function favoritos(server) {
 
   // POST /favoritos -> Salva o favorito atrelado ao usuário logado
   server.post('/favoritos', { onRequest: [server.authenticate] }, async (request, reply) => {
-    const { id_material } = request.body || {}
+    const id_material = request.body?.id_material || request.body?.materialId || request.body?.idMaterial
     const usuarioId = request.user?.sub || request.user?.id || request.user?.usuarioId || request.user
-
+    
     const numMaterialId = Number(id_material)
     const numUsuarioId = Number(usuarioId)
 
