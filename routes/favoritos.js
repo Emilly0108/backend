@@ -31,11 +31,9 @@ export function favoritos(server) {
   // POST /favoritos -> Salva o favorito atrelado ao usuário logado
   server.post('/favoritos', { onRequest: [server.authenticate] }, async (request, reply) => {
     try {
-      // 1. Pega o id_material flexível
       const id_material = request.body?.id_material || request.body?.materialId || request.body?.idMaterial;
       const numMaterialId = Number(id_material);
 
-      // 2. Extrai o ID do Usuário/Professor com segurança
       const rawUser = request.user;
       const rawId = rawUser?.professor?.id || rawUser?.id || rawUser?.sub || rawUser?.usuarioId || rawUser;
       const numUsuarioId = Number(rawId);
@@ -48,7 +46,7 @@ export function favoritos(server) {
         return reply.status(401).send({ message: "Usuário/Professor não identificado no token." });
       }
 
-      // 3. Evita duplicar o mesmo favorito
+      // 1. Evita duplicar o mesmo favorito
       const jaExiste = await prisma.favorito.findFirst({
         where: {
           idUsuario: numUsuarioId,
@@ -60,11 +58,11 @@ export function favoritos(server) {
         return reply.status(200).send(jaExiste);
       }
 
-      // 4. Cria o favorito no banco
+      // 2. Cria utilizando a conexão direta das relações do Prisma
       const favorito = await prisma.favorito.create({
         data: {
-          idMaterial: numMaterialId,
-          idUsuario: numUsuarioId
+          material: { connect: { id: numMaterialId } },
+          usuario: { connect: { id: numUsuarioId } }
         }
       });
 
@@ -72,9 +70,12 @@ export function favoritos(server) {
 
     } catch (error) {
       console.error("Erro interno ao favoritar:", error);
-      return reply.status(500).send({ message: "Erro ao favoritar no banco de dados", detelhes: error.message });
+      return reply.status(500).send({ 
+        message: "Erro ao favoritar no banco de dados", 
+        detalhes: error.message 
+      });
     }
-  })
+  });
 
   // GET /favoritos/:id
   server.get('/favoritos/:id', { onRequest: [server.authenticate] }, async (request, reply) => {
@@ -112,5 +113,4 @@ export function favoritos(server) {
     return reply.status(204).send()
   })
 
-  return
 }
