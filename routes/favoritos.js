@@ -5,7 +5,7 @@ export function favoritos(server) {
   // GET /favoritos -> Busca apenas os favoritos do usuário logado
   server.get('/favoritos', { onRequest: [server.authenticate] }, async (request, reply) => {
     const search = request.query?.search
-    const usuarioId = request.user?.sub || request.user?.id || request.user?.usuarioId || request.user
+    const usuarioId = request.user?.professor?.id || request.user?.id || request.user?.sub || request.user?.usuarioId || request.user
 
     const favoritos = await prisma.favorito.findMany({
       where: {
@@ -79,7 +79,7 @@ export function favoritos(server) {
   // GET /favoritos/:id
   server.get('/favoritos/:id', { onRequest: [server.authenticate] }, async (request, reply) => {
     const { id } = request.params
-    const usuarioId = request.user?.sub || request.user?.id || request.user?.usuarioId || request.user
+    const usuarioId = request.user?.professor?.id || request.user?.id || request.user?.sub || request.user?.usuarioId || request.user
 
     const favorito = await prisma.favorito.findUnique({
       where: {
@@ -97,12 +97,15 @@ export function favoritos(server) {
   // DELETE /favoritos/:id -> Remove o favorito filtrando por ID do favorito e do Usuário
   server.delete('/favoritos/:id', { onRequest: [server.authenticate] }, async (request, reply) => {
     const { id } = request.params
-    const usuarioId = request.user?.sub || request.user?.id || request.user?.usuarioId || request.user
+    const usuarioId = request.user?.professor?.id || request.user?.id || request.user?.sub || request.user?.usuarioId || request.user
 
     await prisma.favorito.deleteMany({
       where: { 
-        id: Number(id),
-        idUsuario: Number(usuarioId)
+        idUsuario: Number(usuarioId),
+        OR: [
+          { id: Number(id) },
+          { idMaterial: Number(id) }
+        ]
       }
     })
 
