@@ -4,28 +4,38 @@ export function favoritos(server) {
 
   // GET /favoritos -> Busca apenas os favoritos do usuário logado
   server.get('/favoritos', { onRequest: [server.authenticate] }, async (request, reply) => {
-    const search = request.query?.search
-    const usuarioId = request.user?.professor?.id || request.user?.id || request.user?.sub || request.user?.usuarioId || request.user
+    try {
+      const search = request.query?.search
+      const rawUser = request.user
+      const usuarioId = Number(rawUser?.professor?.id || rawUser?.id || rawUser?.sub || rawUser?.usuarioId)
 
-    const favoritos = await prisma.favorito.findMany({
-      where: {
-        idUsuario: Number(usuarioId),
-        ...(search ? {
-          material: {
-            titulo: { contains: String(search), mode: 'insensitive' }
-          }
-        } : {})
-      },
-      include: {
-        material: {
-          include: {
-            disciplina: true
-          }
-        } 
+      if (!usuarioId || isNaN(usuarioId)) {
+        return reply.status(200).send([])
       }
-    })
 
-    return reply.send(favoritos)
+      const favoritos = await prisma.favorito.findMany({
+        where: {
+          idUsuario: usuarioId,
+          ...(search ? {
+            material: {
+              titulo: { contains: String(search), mode: 'insensitive' }
+            }
+          } : {})
+        },
+        include: {
+          material: {
+            include: {
+              disciplina: true
+            }
+          } 
+        }
+      })
+
+      return reply.send(favoritos)
+    } catch (error) {
+      console.error("Erro no GET /favoritos:", error)
+      return reply.status(500).send({ message: "Erro ao buscar favoritos", error: error.message })
+    }
   })
 
   // POST /favoritos -> Salva o favorito atrelado ao usuário logado
@@ -35,7 +45,7 @@ export function favoritos(server) {
       const numMaterialId = Number(id_material);
 
       const rawUser = request.user;
-      const rawId = rawUser?.professor?.id || rawUser?.id || rawUser?.sub || rawUser?.usuarioId || rawUser;
+      const rawId = rawUser?.professor?.id || rawUser?.id || rawUser?.sub || rawUser?.usuarioId;
       const numUsuarioId = Number(rawId);
 
       if (!numMaterialId || isNaN(numMaterialId)) {
@@ -58,11 +68,11 @@ export function favoritos(server) {
         return reply.status(200).send(jaExiste);
       }
 
-      // 2. Cria utilizando a conexão direta das relações do Prisma
+      // 2. Cria inserindo os IDs diretos nos campos escalares para evitar falha no Prisma
       const favorito = await prisma.favorito.create({
         data: {
-          material: { connect: { id: numMaterialId } },
-          usuario: { connect: { id: numUsuarioId } }
+          idMaterial: numMaterialId,
+          idUsuario: numUsuarioId
         }
       });
 
@@ -79,38 +89,53 @@ export function favoritos(server) {
 
   // GET /favoritos/:id
   server.get('/favoritos/:id', { onRequest: [server.authenticate] }, async (request, reply) => {
-    const { id } = request.params
-    const usuarioId = request.user?.professor?.id || request.user?.id || request.user?.sub || request.user?.usuarioId || request.user
+    try {
+      const { id } = request.params
+      const rawUser = request.user
+      const usuarioId = Number(rawUser?.professor?.id || rawUser?.id || rawUser?.sub || rawUser?.usuarioId)
 
-    const favorito = await prisma.favorito.findUnique({
-      where: {
-        id: Number(id)
+      const favorito = await prisma.favorito.findUnique({
+        where: {
+          id: Number(id)
+        }
+      })
+
+      if (!favorito || favorito.idUsuario !== usuarioId) {
+        return reply.status(404).send({ message: "Material favorito não encontrado" })
       }
-    })
 
-    if (!favorito || favorito.idUsuario !== Number(usuarioId)) {
-      return reply.status(404).send({ message: "Material favorito não encontrado" })
+      return reply.send(favorito)
+    } catch (error) {
+      return reply.status(500).send({ message: "Erro ao buscar favorito por ID", error: error.message })
     }
-
-    return reply.send(favorito)
   })
 
-  // DELETE /favoritos/:id -> Remove o favorito filtrando por ID do favorito e do Usuário
+  // DELETE /favoritos/:id -> Remove o favorito filtrando por ID do favorito/material e do Usuário
   server.delete('/favoritos/:id', { onRequest: [server.authenticate] }, async (request, reply) => {
-    const { id } = request.params
-    const usuarioId = request.user?.professor?.id || request.user?.id || request.user?.sub || request.user?.usuarioId || request.user
+    try {
+      const { id } = request.params
+      const rawUser = request.user
+      const usuarioId = Number(rawUser?.professor?.id || rawUser?.id || rawUser?.sub || rawUser?.usuarioId)
 
-    await prisma.favorito.deleteMany({
-      where: { 
-        idUsuario: Number(usuarioId),
-        OR: [
-          { id: Number(id) },
-          { idMaterial: Number(id) }
-        ]
+      if (!usuarioId || isNaN(usuarioId)) {
+        return reply.status(401).send({ message: "Usuário/Professor não identificado no token." })
       }
-    })
 
-    return reply.status(204).send()
+      await prisma.favorito.deleteMany({
+        where: { 
+          idUsuario: usuarioId,
+          OR: [
+            { id: Number(id) },
+            { idMaterial: Number(id) }
+          ]
+        }
+      })
+
+      return reply.status(204).send()
+    } catch (error) {
+      console.error("Erro no DELETE /favoritos:", error)
+      return reply.status(500).send({ message: "Erro ao remover favorito", error: error.message })
+    }
   })
 
 }
