@@ -30,32 +30,50 @@ export function favoritos(server) {
 
   // POST /favoritos -> Salva o favorito atrelado ao usuário logado
   server.post('/favoritos', { onRequest: [server.authenticate] }, async (request, reply) => {
-    const { id_material } = request.body || {}
-    const usuarioId = request.user?.sub || request.user?.id || request.user?.usuarioId || request.user
+    try {
+      // 1. Pega o id_material flexível
+      const id_material = request.body?.id_material || request.body?.materialId || request.body?.idMaterial;
+      const numMaterialId = Number(id_material);
 
-    const numMaterialId = Number(id_material)
-    const numUsuarioId = Number(usuarioId)
+      // 2. Extrai o ID do Usuário/Professor com segurança
+      const rawUser = request.user;
+      const rawId = rawUser?.professor?.id || rawUser?.id || rawUser?.sub || rawUser?.usuarioId || rawUser;
+      const numUsuarioId = Number(rawId);
 
-    // Evita duplicar o mesmo favorito para o mesmo usuário
-    const jaExiste = await prisma.favorito.findFirst({
-      where: {
-        idUsuario: numUsuarioId,
-        idMaterial: numMaterialId
+      if (!numMaterialId || isNaN(numMaterialId)) {
+        return reply.status(400).send({ message: "ID do material é inválido ou ausente." });
       }
-    })
 
-    if (jaExiste) {
-      return reply.status(200).send(jaExiste)
+      if (!numUsuarioId || isNaN(numUsuarioId)) {
+        return reply.status(401).send({ message: "Usuário/Professor não identificado no token." });
+      }
+
+      // 3. Evita duplicar o mesmo favorito
+      const jaExiste = await prisma.favorito.findFirst({
+        where: {
+          idUsuario: numUsuarioId,
+          idMaterial: numMaterialId
+        }
+      });
+
+      if (jaExiste) {
+        return reply.status(200).send(jaExiste);
+      }
+
+      // 4. Cria o favorito no banco
+      const favorito = await prisma.favorito.create({
+        data: {
+          idMaterial: numMaterialId,
+          idUsuario: numUsuarioId
+        }
+      });
+
+      return reply.status(201).send(favorito);
+
+    } catch (error) {
+      console.error("Erro interno ao favoritar:", error);
+      return reply.status(500).send({ message: "Erro ao favoritar no banco de dados", detelhes: error.message });
     }
-
-    const favorito = await prisma.favorito.create({
-      data: {
-        idMaterial: numMaterialId,
-        idUsuario: numUsuarioId
-      }
-    })
-
-    return reply.status(201).send(favorito)
   })
 
   // GET /favoritos/:id
