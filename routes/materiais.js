@@ -1,5 +1,6 @@
 import { error } from "console";
 import { prisma } from "../lib/prisma.ts"
+import { enviarEmailStatusMaterial } from "../lib/email.js";
 export function materiais(server){
     //cadastrar
     server.post('/materiais', { onRequest: [server.authenticate] }, async (request, reply) => {
@@ -236,8 +237,22 @@ export function materiais(server){
             data: {
                 status: 'aprovado',
                 motivoRejeicao: null
+            },
+            include: {
+                professor: true
             }
         });
+
+        try {
+            await enviarEmailStatusMaterial(
+                material.professor.email,
+                material.professor.nome,
+                material.titulo,
+                'aprovado'
+            );
+        } catch (erro) {
+            console.error('>>> ERRO AO ENVIAR EMAIL DE APROVAÇÃO (material foi aprovado mesmo assim):', erro);
+        }
 
         return reply.status(200).send(material);
     })
@@ -258,8 +273,23 @@ export function materiais(server){
             data:{
                 status: 'rejeitado',
                 motivoRejeicao: motivoRejeicao || null
+            },
+            include: {
+                professor: true
             }
         });
+
+        try {
+            await enviarEmailStatusMaterial(
+                material.professor.email,
+                material.professor.nome,
+                material.titulo,
+                'rejeitado',
+                motivoRejeicao
+            );
+        } catch (erro) {
+            console.error('>>> ERRO AO ENVIAR EMAIL DE REJEIÇÃO (material foi rejeitado mesmo assim):', erro);
+        }
 
         return reply.status(200).send(material);    
     })
