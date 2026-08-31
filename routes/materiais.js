@@ -169,26 +169,58 @@ export function materiais(server){
         return reply.status(200).send(material);
     } )
 
-    server.put('/materiais/:id', { onRequest: [server.authenticate] }, async(request, reply) =>{
-        const {id} = request.params;
+    server.put(
+    '/materiais/:id',
+    { onRequest: [server.authenticate] },
+    async (request, reply) => {
 
-        const {titulo, descricao, disciplinaId, palavrasChave} = request.body;
+        try {
+            const { id } = request.params;
 
-        const material = await prisma.material.update({
-            where:{
-                id:Number(id)
-            },
-            data: {
-                titulo,
-                descricao,
-                palavrasChave,
-                disciplinaId: Number(disciplinaId)
-                
+            const { titulo, descricao, disciplinaId, palavrasChave } = request.body;
+
+            if (request.user?.tipo !== 'adm') {
+                return reply.status(403).send({
+                    error: 'Acesso negado. Apenas administradores podem editar materiais.'
+                });
             }
-        });
 
-        return reply.status(200).send(material);
-    })
+            const material = await prisma.material.findUnique({
+                where: {
+                    id: Number(id)
+                }
+            });
+
+            if (!material) {
+                return reply.status(404).send({
+                    error: 'Material não encontrado'
+                });
+            }
+
+            const materialAtualizado = await prisma.material.update({
+                where: {
+                    id: Number(id)
+                },
+                data: {
+                    titulo,
+                    descricao,
+                    palavrasChave,
+                    disciplinaId: Number(disciplinaId)
+                }
+            });
+
+            return reply.status(200).send(materialAtualizado);
+
+        } catch (error) {
+
+            console.error('>>> ERRO AO EDITAR MATERIAL:', error);
+
+            return reply.status(500).send({
+                error: 'Erro ao editar material.'
+            });
+        }
+    }
+);
 
     server.put('/materiais/:id/aprovar', { onRequest: [server.authenticate] }, async(request, reply)=>{
         const { id } = request.params;
@@ -232,13 +264,17 @@ export function materiais(server){
         return reply.status(200).send(material);    
     })
 
-    server.delete('/materiais/:id', { onRequest: [server.authenticate] }, async(request, reply)=>{
-        const {id} = request.params
+    server.delete('/materiais/:id', { onRequest: [server.authenticate] }, async (request, reply) => {
+        const { id } = request.params;
+
+        if (request.user?.tipo !== 'adm') {
+            return reply.status(403).send({ error: 'Acesso negado. Apenas administradores podem excluir.' });
+        }
 
         await prisma.material.delete({
-            where: {id: Number(id)}
-        })
+            where: { id: Number(id) }
+        });
 
-        return reply.status(204).send()
-    })
+        return reply.status(204).send();
+    });
 }
