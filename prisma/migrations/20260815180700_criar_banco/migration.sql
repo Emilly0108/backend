@@ -53,9 +53,3 @@ ALTER TABLE "materiais" ADD CONSTRAINT "materiais_disciplinaId_fkey" FOREIGN KEY
 
 -- AddForeignKey
 ALTER TABLE "materiais" ADD CONSTRAINT "materiais_professorId_fkey" FOREIGN KEY ("professorId") REFERENCES "professores"("id_professor") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- 1. Adiciona a coluna id_usuario na tabela favoritos
-ALTER TABLE "favoritos" ADD COLUMN "id_usuario" INTEGER;
-
--- 2. Cria a relação de chave estrangeira com a tabela professores
-ALTER TABLE "favoritos" ADD CONSTRAINT "favoritos_id_usuario_fkey" FOREIGN KEY ("id_usuario") REFERENCES "professores"("id_professor") ON DELETE SET NULL ON UPDATE CASCADE;
